@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lovable AI PDF Tools</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles for glassmorphism, animations, and dark mode */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8; /* Lighter gray background */
+        }
+
+        /* Light mode glass */
+        .glass-light {
+            background-color: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Dark mode glass */
+        .dark .glass-dark {
+            background-color: rgba(40, 40, 42, 0.7);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Dark mode base background */
+        .dark body {
+            background-color: #111113; /* Darker Apple-like background */
+        }
+        
+        /* Custom scrollbar for a modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4); /* gray-400 with opacity */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.6);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(107, 114, 128, 0.4); /* dark:gray-500 with opacity */
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.6);
+        }
+
+        /* Tool card hover effect */
+        .tool-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150%;
+            height: 150%;
+            background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 55%);
+            transform: translate(-25%, -25%) scale(1);
+            opacity: 0.7;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none; /* So it doesn't block clicks */
+        }
+        .dark .tool-card::before {
+            background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 55%);
+        }
+        .tool-card:hover::before {
+            transform: translate(-15%, -15%) scale(1.1);
+            opacity: 1;
+        }
+        .dark .tool-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 24px -8px rgba(0, 0, 0, 0.1);
+        }
+        .dark .tool-card:hover {
+             box-shadow: 0 16px 24px -8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 'NEW' Badge */
+        .new-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3), 0 2px 4px -1px rgba(239, 68, 68, 0.2);
+            animation: pulse-badge 1.5s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+        }
+        
+        /* Progress bar animation */
+        @keyframes progress-indeterminate {
+            0% {
+                left: -35%;
+                right: 100%;
+            }
+            60% {
+                left: 100%;
+                right: -90%;
+            }
+            100% {
+                left: 100%;
+                right: -90%;
+            }
+        }
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background-color: #3b82f6; /* blue-500 */
+            will-change: left, right;
+            animation: progress-indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+        }
+        
+        /* Modal fade-in animation */
+        .modal-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-content-scale-in {
+            animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Liquid button effect */
+        .btn-glass { /* Renamed from btn-liquid */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px; /* Make it a capsule */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-glass::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 30%; /* Position glow near the start */
+            width: 120px;
+            height: 120px;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 60%);
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+        .dark .btn-glass::before {
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 60%);
+        }
+        .btn-glass:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .btn-glass:hover::before {
+            transform: translate(-40%, -50%) scale(1.1); /* Move glow slightly on hover */
+        }
+        .btn-glass:active {
+            transform: scale(0.98);
+        }
+        .btn-glass.bg-blue-500 {
+            background-color: rgba(59, 130, 246, 0.7) !important;
+        }
+        .btn-glass.bg-green-500 {
+            background-color: rgba(34, 197, 94, 0.7) !important;
+        }
+        .dark .btn-glass.bg-blue-500 {
+            background-color: rgba(59, 130, 246, 0.6) !important;
+        }
+        .dark .btn-glass.bg-green-500 {
+            background-color: rgba(34, 197, 94, 0.6) !important;
+        }
+        .dark .btn-glass {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="text-gray-900 dark:text-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 w-full glass-light dark:glass-dark shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-8 h-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h4.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563H9.564A.562.562 0 019 14.437V9.564z" />
+                    </svg>
+                    <span class="text-xl font-bold text-gray-800 dark:text-white">Lovable PDF Tools</span>
+                </div>
+                <!-- Dark Mode Toggle (Optional, but nice for modern UI) -->
+                <button id="dark-mode-toggle" class="p-2 rounded-full glass-light dark:glass-dark transition-colors">
+                    <svg id="theme-icon-light" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="theme-icon-dark" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <!-- Main PDF Tools Section -->
+        <section>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-8 text-center">Your All-in-One PDF Toolkit</h1>
+            <div id="tools-grid-main" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6">
+                <!-- Tool cards will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Other PDF Tools Section -->
+        <section class="mt-16">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">More PDF & Document Tools</h2>
+            <div id="tools-grid-other" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6">
+                <!-- Other tool cards will be injected here by JavaScript -->
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 text-center p-8 border-t border-gray-200 dark:border-gray-800">
+        <p class="text-gray-500 dark:text-gray-400">&copy; 2025 Lovable AI Tools. All rights reserved.</p>
+    </footer>
+
+    <!-- Tool Modal -->
+    <div id="tool-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 z-50 hidden modal-fade-in">
+        <div class="glass-light dark:glass-dark rounded-3xl shadow-2xl w-full max-w-2xl modal-content-scale-in overflow-hidden">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-5 border-b border-gray-200/50 dark:border-gray-700/50">
+                <h3 id="modal-title" class="text-xl font-semibold">Tool Name</h3>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 md:p-8">
+                <!-- 1. Upload State -->
+                <div id="upload-state">
+                    <div id="drop-zone" class="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl p-8 md:p-12 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-16 h-16 text-blue-500 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                            </svg>
+                            <p class="mt-4 text-lg font-medium">Drag & drop files here</p>
+                            <p class="mt-1 text-gray-500 dark:text-gray-400">or</p>
+                            <label for="file-upload" class="btn-glass mt-4 px-6 py-2 bg-blue-500 text-white font-semibold shadow-md transition-all cursor-pointer">
+                                Choose Files
+                            </label>
+                            <input id="file-upload" type="file" class="hidden" multiple />
+                        </div>
+                    </div>
+                    <p id="file-name-display" class="mt-4 text-center text-gray-600 dark:text-gray-300 hidden"></p>
+                </div>
+
+                <!-- 2. Processing State -->
+                <div id="processing-state" class="hidden">
+                    <p id="processing-file-name" class="text-lg font-medium text-center"></p>
+                    <p class="text-center text-gray-500 dark:text-gray-400 mt-2 mb-4">Processing, please wait...</p>
+                    <div class="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="progress-bar h-2 rounded-full"></div>
+                    </div>
+                </div>
+                
+                <!-- 3. Complete State -->
+                <div id="complete-state" class="hidden text-center">
+                    <svg class="w-16 h-16 text-green-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h4 class="text-xl font-semibold mt-4">Complete!</h4>
+                    <p class="text-gray-600 dark:text-gray-300 mt-1">Your file is ready to download.</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-b-3xl">
+                <!-- Upload State Button -->
+                <button id="process-btn" class="btn-glass w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Process File
+                </button>
+                <!-- Complete State Button -->
+                <button id="download-btn" class="btn-glass w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-all hidden">
+                    Download File
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Tool Data ---
+            // In a real app, you might fetch this. Here we define it.
+            // I'll create a few representative icons.
+            const icons = {
+                edit: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>`,
+                compress: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>`,
+                merge: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25z" /></svg>`,
+                pdfWord: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m0-3l-3-3m0 0l-3 3m3-3v11.25m6.375 0l-3-3m0 0l-3 3m3-3v11.25" /></svg>`,
+                wordPdf: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m0-3l-3-3m0 0l-3 3m3-3v11.25m6.375 0l-3-3m0 0l-3 3m3-3v11.25" /></svg>`, // Re-used
+                pdfJpg: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25z" /></svg>`,
+                jpgPdf: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25z" /></svg>`, // Re-used
+                chat: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-3.86 8.25-8.625 8.25a9.373 9.373 0 01-4.342-.906l-4.42 1.105a.375.375 0 01-.44-.44l1.105-4.42A9.373 9.373 0 013.75 12c0-4.556 3.86-8.25 8.625-8.25S21 7.444 21 12z" /></svg>`,
+                split: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 005.042 2.12 15.997 15.997 0 005.042-2.12m-10.084 0a3 3 0 015.78-1.128 2.25 2.25 0 002.4-2.245 4.5 4.5 0 01-8.4 2.245c0 .399.078.78.22 1.128zM19.5 10.5c0 .621.072 1.227.206 1.81.133.583.294 1.144.478 1.684a3 3 0 01-5.78-1.128c0-.399.078-.78.22-1.128m0 0a15.998 15.998 0 00-5.042-2.12A15.997 15.997 0 009.53 8.32m10.084 0a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128z" /></svg>`,
+                unlock: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m11.355-1.139a.626.626 0 01.37.11 1.5 1.5 0 01.04 2.063l-3.6 3.6a.626.626 0 01-.11.04 1.5 1.5 0 01-2.063-.04l-3.6-3.6a.626.626 0 01-.04-2.063 1.5 1.5 0 012.063-.04a.626.626 0 01.11.039l3.6 3.6zM15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+                protect: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>`,
+                ocr: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21M10.5 21H3M13.5 3l-3 4.5 3 4.5M21 3H10.5" /></svg>`,
+                default: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>`,
+                summarize: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>`,
+                translate: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C13.18 7.061 14.288 7 15.428 7c1.14 0 2.248.061 3.334.178m-5.834-2.55C12.42 5.06 13.72 5 15 5c1.28 0 2.58.06 3.746.178M9 9.75H4.5M9 12.75H4.5M9 15.75H4.5m13.5-3.04C18.66 13.06 17.36 13 16 13c-1.36 0-2.66.06-3.854.178" /></svg>`,
+                sign: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg>`,
+                excel: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125H6.75m13.5 0S21 17.625 21 16.5v-1.5c0-.621-.504-1.125-1.125-1.125h-2.625m-13.5 0h2.625m5.625 0h2.625m0 0h3.375m-3.375 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-5.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-5.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M3.375 7.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125H6.75m13.5 0S21 5.625 21 4.5v-1.5c0-.621-.504-1.125-1.125-1.125h-2.625m-13.5 0h2.625m5.625 0h2.625m0 0h3.375M12 3.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-5.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M6.375 3.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m12 0h3.375m-3.375 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-5.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-5.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125" /></svg>`,
+                viewer: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" /></svg>`,
+                watermark: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048l-2.022 2.022A.75.75 0 004.5 10.25h15a.75.75 0 00.53-1.28l-2.668-2.668z" /></svg>`,
+            };
+
+            const mainTools = [
+                { name: 'Edit PDF', icon: icons.edit, isNew: false, color: 'text-yellow-500' },
+                { name: 'Compress PDF', icon: icons.compress, isNew: false, color: 'text-red-500' },
+                { name: 'Merge PDF', icon: icons.merge, isNew: false, color: 'text-yellow-600' },
+                { name: 'PDF to Word', icon: icons.pdfWord, isNew: false, color: 'text-blue-600' },
+                { name: 'Word to PDF', icon: icons.wordPdf, isNew: false, color: 'text-blue-400' },
+                { name: 'PDF to JPG', icon: icons.pdfJpg, isNew: false, color: 'text-purple-500' },
+                { name: 'JPG to PDF', icon: icons.jpgPdf, isNew: false, color: 'text-purple-400' },
+                { name: 'PDF Converter', icon: icons.default, isNew: false, color: 'text-yellow-400' },
+                { name: 'Chat with PDF', icon: icons.chat, isNew: true, color: 'text-purple-500' },
+                { name: 'Split PDF', icon: icons.split, isNew: false, color: 'text-green-500' },
+                { name: 'Unlock PDF', icon: icons.unlock, isNew: false, color: 'text-orange-500' },
+                { name: 'Edit metadata', icon: icons.default, isNew: false, color: 'text-gray-500' },
+                { name: 'Delete pages', icon: icons.default, isNew: false, color: 'text-red-400' },
+                { name: 'Rearrange pages', icon: icons.default, isNew: false, color: 'text-blue-500' }
+            ];
+
+            const otherTools = [
+                { name: 'PDF OCR', icon: icons.ocr, isNew: false, color: 'text-blue-500' },
+                { name: 'Summarize', icon: icons.summarize, isNew: true, color: 'text-green-500' },
+                { name: 'Translate PDF', icon: icons.translate, isNew: true, color: 'text-blue-400' },
+                { name: 'PNG to PDF', icon: icons.default, isNew: false, color: 'text-green-400' },
+                { name: 'PDF to PNG', icon: icons.default, isNew: false, color: 'text-green-500' },
+                { name: 'EPUB to PDF', icon: icons.default, isNew: false, color: 'text-indigo-400' },
+                { name: 'PDF to EPUB', icon: icons.default, isNew: false, color: 'text-indigo-500' },
+                { name: 'Protect PDF', icon: icons.protect, isNew: false, color: 'text-red-500' },
+                { name: 'Rotate PDF', icon: icons.default, isNew: false, color: 'text-blue-300' },
+                { name: 'Crop PDF', icon: icons.default, isNew: false, color: 'text-green-300' },
+                { name: 'Sign PDF', icon: icons.sign, isNew: false, color: 'text-blue-600' },
+                { name: 'PDF to DOCX', icon: icons.pdfWord, isNew: false, color: 'text-blue-600' },
+                { name: 'Excel to PDF', icon: icons.excel, isNew: false, color: 'text-green-600' },
+                { name: 'PDF to Excel', icon: icons.excel, isNew: false, color: 'text-green-700' },
+                { name: 'Image to PDF', icon: icons.jpgPdf, isNew: false, color: 'text-purple-400' },
+                { name: 'PPTX to PDF', icon: icons.default, isNew: false, color: 'text-orange-500' },
+                { name: 'HEIC to PDF', icon: icons.default, isNew: false, color: 'text-gray-400' },
+                { name: 'HTML to PDF', icon: icons.default, isNew: false, color: 'text-orange-400' },
+                { name: 'DjVu to PDF', icon: icons.default, isNew: false, color: 'text-gray-500' },
+                { name: 'TXT to PDF', icon: icons.default, isNew: false, color: 'text-gray-400' },
+                { name: 'Extract pages', icon: icons.default, isNew: false, color: 'text-blue-400' },
+                { name: 'Extract text', icon: icons.default, isNew: false, color: 'text-yellow-500' },
+                { name: 'Extract images', icon: icons.default, isNew: false, color: 'text-purple-500' },
+                { name: 'Page numbers', icon: icons.default, isNew: false, color: 'text-gray-500' },
+                { name: 'PDF Viewer', icon: icons.viewer, isNew: false, color: 'text-blue-500' },
+                { name: 'Add watermark', icon: icons.watermark, isNew: false, color: 'text-blue-300' },
+                { name: 'Flatten PDF', icon: icons.default, isNew: false, color: 'text-gray-600' },
+                { name: 'Resize pages', icon: icons.default, isNew: false, color: 'text-green-400' },
+                { name: 'PDF to MOBI', icon: icons.default, isNew: false, color: 'text-orange-600' },
+                { name: 'MOBI to PDF', icon: icons.default, isNew: false, color: 'text-orange-700' },
+                { name: 'XML to PDF', icon: icons.default, isNew: false, color: 'text-gray-500' },
+                { name: 'FB2 to PDF', icon: icons.default, isNew: false, color: 'text-blue-700' },
+                { name: 'Header and footer', icon: icons.default, isNew: false, color: 'text-gray-400' },
+                { name: 'ZIP to PDF', icon: icons.default, isNew: false, color: 'text-yellow-600' },
+                { name: 'All PDF Tools', icon: icons.default, isNew: false, color: 'text-red-500' },
+            ];
+
+            const mainGrid = document.getElementById('tools-grid-main');
+            const otherGrid = document.getElementById('tools-grid-other');
+            
+            const createToolCard = (tool) => `
+                <div class="tool-card relative glass-light dark:glass-dark rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer shadow-lg hover:shadow-2xl" data-tool-name="${tool.name}">
+                    <div class="icon-container ${tool.color} mb-4">
+                        ${tool.icon || icons.default}
+                    </div>
+                    <h3 class="font-semibold text-gray-800 dark:text-white">${tool.name}</h3>
+                    ${tool.isNew ? '<div class="new-badge">NEW</div>' : ''}
+                </div>
+            `;
+
+            mainTools.forEach(tool => {
+                mainGrid.innerHTML += createToolCard(tool);
+            });
+            
+            otherTools.forEach(tool => {
+                otherGrid.innerHTML += createToolCard(tool);
+            });
+
+            // --- Dark Mode Toggle ---
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            const lightIcon = document.getElementById('theme-icon-light');
+            const darkIcon = document.getElementById('theme-icon-dark');
+            
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                darkIcon.classList.remove('hidden');
+            } else {
+                lightIcon.classList.remove('hidden');
+            }
+
+            toggleButton.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                lightIcon.classList.toggle('hidden');
+                darkIcon.classList.toggle('hidden');
+                if (document.documentElement.classList.contains('dark')) {
+                    localStorage.theme = 'dark';
+                } else {
+                    localStorage.theme = 'light';
+                }
+            });
+
+            // --- Modal Logic ---
+            const modal = document.getElementById('tool-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const toolCards = document.querySelectorAll('.tool-card');
+            
+            // Modal States
+            const uploadState = document.getElementById('upload-state');
+            const processingState = document.getElementById('processing-state');
+            const completeState = document.getElementById('complete-state');
+            
+            // File Handling
+            const dropZone = document.getElementById('drop-zone');
+            const fileUpload = document.getElementById('file-upload');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const processingFileName = document.getElementById('processing-file-name');
+            let uploadedFile = null;
+
+            // Buttons
+            const processBtn = document.getElementById('process-btn');
+            const downloadBtn = document.getElementById('download-btn');
+
+            const resetModal = () => {
+                uploadState.classList.remove('hidden');
+                processingState.classList.add('hidden');
+                completeState.classList.add('hidden');
+                
+                processBtn.classList.remove('hidden');
+                processBtn.disabled = true;
+                downloadBtn.classList.add('hidden');
+                
+                fileNameDisplay.classList.add('hidden');
+                fileNameDisplay.textContent = '';
+                processingFileName.textContent = '';
+                uploadedFile = null;
+                dropZone.classList.remove('border-green-500', 'dark:border-green-400');
+            };
+
+            const openModal = (toolName) => {
+                resetModal();
+                modalTitle.textContent = toolName;
+                modal.classList.remove('hidden');
+            };
+
+            const closeModal = () => {
+                modal.classList.add('hidden');
+            };
+
+            toolCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const toolName = card.getAttribute('data-tool-name');
+                    openModal(toolName);
+                });
+            });
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                // Close if clicking on the backdrop
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // --- Simulated File Upload Logic ---
+            
+            const handleFileSelect = (file) => {
+                if (!file) return;
+                uploadedFile = file;
+                fileNameDisplay.textContent = `File selected: ${file.name}`;
+                fileNameDisplay.classList.remove('hidden');
+                processingFileName.textContent = file.name;
+                processBtn.disabled = false;
+                dropZone.classList.add('border-green-500', 'dark:border-green-400');
+            };
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-blue-500', 'dark:border-blue-400');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'dark:border-blue-400');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'dark:border-blue-400');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileUpload.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            // --- Simulated Processing Logic ---
+            
+            processBtn.addEventListener('click', () => {
+                if (!uploadedFile) return;
+
+                // 1. Hide upload, show processing
+                uploadState.classList.add('hidden');
+                processingState.classList.remove('hidden');
+                processBtn.classList.add('hidden');
+                
+                // 2. Simulate processing time
+                setTimeout(() => {
+                    // 3. Hide processing, show complete
+                    processingState.classList.add('hidden');
+                    completeState.classList.remove('hidden');
+                    downloadBtn.classList.remove('hidden');
+                }, 2500); // 2.5 second simulation
+            });
+            
+            // Download button (simulated)
+            downloadBtn.addEventListener('click', () => {
+                // In a real app, this would trigger a download.
+                // For simulation, we'll just close the modal.
+                closeModal();
+            });
+
+        });
+    </script>
+</body>
+</html>
